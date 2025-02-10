@@ -22,25 +22,40 @@ def haversine(lat1, lon1, lat2, lon2):
     
     return distance
 
-def get_lat_lon(api_key, address):
+def get_lat_lon(api_key, address, expected_comuna):
     base_url = "https://maps.googleapis.com/maps/api/geocode/json"
-    params = {
-        'address': address,
-        'key': api_key
-    }
+    params = {'address': address, 'key': api_key}
     response = requests.get(base_url, params=params)
-    
+
     if response.status_code == 200:
         data = response.json()
-        if data['status'] == 'OK':
-            geometry = data['results'][0]['geometry']['location']
-            return geometry['lat'], geometry['lng']
-        else:
-            print("Error en la respuesta de la API:", data['status'])
-    else:
-        print("Error en la solicitud:", response.status_code)
+        print(data)
 
-    return None, None
+        if data['status'] == 'OK':
+            result = data['results'][0] 
+            geometry = result['geometry']
+            location_type = geometry.get('location_type', '')
+
+            lat, lon = geometry['location']['lat'], geometry['location']['lng']
+            formatted_address = result.get("formatted_address", "").upper()
+            
+            if location_type not in ["ROOFTOP", "RANGE_INTERPOLATED"]:
+                print(f"Ubicación imprecisa ({location_type}), descartando.")
+                return None, None , location_type, data,formatted_address
+
+            
+            formatted_address = result.get("formatted_address", "").upper()
+            
+
+            return lat, lon,location_type, data,formatted_address 
+
+        else:
+            print(f"Error en la respuesta de la API: {data['status']}")
+
+    else:
+        print(f"Error en la solicitud: {response.status_code}")
+
+    return None, None, None, None, None
     
 def buscar_lugares(api_key, latitud, longitud, radius=50):
     url = "https://maps.googleapis.com/maps/api/place/nearbysearch/json"
@@ -53,9 +68,9 @@ def buscar_lugares(api_key, latitud, longitud, radius=50):
 
     response = requests.get(url, params=params)
     lugares_lista = []  
-
     if response.status_code == 200:
         resultados = response.json().get('results', [])
+        print(f"Se encontraron {len(resultados)} lugares cercanos")
         for lugar in resultados:
             lugares_lista.append({
                 "Nombre": lugar.get('name'),
