@@ -1,19 +1,16 @@
 import pandas as pd
 from utils.geolocalizacion import get_lat_lon
 import os
-from utils.normalizador_direcciones import limpiar_direcciones_excel
-from utils.chat_gpt_normalizador import NormalizadorDirecciones
-import openai
+
 def get_lat_long_type(row, api_key):
-    #address = row['direccion_beneficiario']
-    #comuna = row['beneficiario_comuna']
-    #address_completed = f"{address}, {comuna}, Chile"
-    address_completed = row['direccion_normalizada']
-    lat, lon, location_type, data, formatted_address = get_lat_lon(api_key, address_completed)
+    address = row['direccion_beneficiario']
+    comuna = row['beneficiario_comuna']
+    address_completed = f"{address}, {comuna}, Chile"
+    lat, lon, location_type, data, formatted_address = get_lat_lon(api_key, address_completed, comuna)
     return lat, lon, location_type, data, formatted_address
 
-def get_lat_long(ruta_excel,output_path):
-    
+if __name__ == '__main__':
+    ruta_excel = 'files/Listado_Beneficiario_Para_Georeferencia_desarrollo.xlsx'
     df = pd.read_excel(ruta_excel)
     api_key = os.getenv("google_maps_api_key")
 
@@ -44,31 +41,6 @@ def get_lat_long(ruta_excel,output_path):
         df.at[index, 'data'] = str(data) if data else "NO DATA"
         df.at[index, 'formatted_address'] = str(formatted_address) if formatted_address else "NO ADDRESS"
 
-    
+    output_path = 'files/Listado_Beneficiario_Para_Georeferencia_desarrollo.xlsx'
     df.to_excel(output_path, index=False)
     print(f"Archivo guardado en {output_path}")
-def normalizar_direciones ():
-        # Cargar claves desde variables de entorno
-    OPENAI_API_KEY = os.getenv("openai_api_key_bst")
-    GMAPS_API_KEY = os.getenv("google_maps_api_key")
-
-    # Crear instancia del normalizador
-    normalizador = NormalizadorDirecciones(OPENAI_API_KEY, GMAPS_API_KEY)
-
-    # Rutas de los archivos
-    ruta_entrada = "files/Listado_Beneficiario_Para_Georeferencia_desarrollo_noktest_chat_gpt.xlsx"
-    ruta_salida = "files/Listado_Beneficiario_Procesado.xlsx"
-
-    # Ejecutar el procesamiento
-    normalizador.procesar_archivo(ruta_entrada, ruta_salida)
-if __name__ == '__main__':
-    ruta_excel = 'files/Listado_Beneficiario_Procesado.xlsx'
-    output_path = 'files/Listado_Beneficiario_Procesado.xlsx'
-    get_lat_long(ruta_excel,output_path)
-    #limpiar_direcciones_excel(
-    #    ruta_excel='files/test_new.xlsx',
-    #    columna_direccion='direccion_beneficiario'
-    #)
-    #normalizar_direciones()
-
-

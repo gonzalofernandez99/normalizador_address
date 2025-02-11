@@ -22,7 +22,7 @@ def haversine(lat1, lon1, lat2, lon2):
     
     return distance
 
-def get_lat_lon(api_key, address, expected_comuna):
+def get_lat_lon(api_key, address):
     base_url = "https://maps.googleapis.com/maps/api/geocode/json"
     params = {'address': address, 'key': api_key}
     response = requests.get(base_url, params=params)
