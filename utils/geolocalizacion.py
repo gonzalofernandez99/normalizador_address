@@ -40,7 +40,6 @@ def get_lat_lon(api_key, address):
             formatted_address = result.get("formatted_address", "").upper()
             
             if location_type not in ["ROOFTOP", "RANGE_INTERPOLATED"]:
-                print(f"Ubicación imprecisa ({location_type}), descartando.")
                 return None, None , location_type, data,formatted_address
 
             
@@ -78,6 +77,6 @@ def buscar_lugares(api_key, latitud, longitud, radius=50):
             })
     else:
         print(f"Error en la solicitud: {response.status_code}")
-        print(response.text)
+        #print(response.text)
     
     return lugares_lista

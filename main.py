@@ -1,7 +1,6 @@
 import pandas as pd
 from utils.geolocalizacion import get_lat_lon
 import os
-from utils.normalizador_direcciones import limpiar_direcciones_excel
 from utils.chat_gpt_normalizador import NormalizadorDirecciones
 import openai
 def get_lat_long_type(row, api_key):
@@ -29,7 +28,7 @@ def get_lat_long(ruta_excel,output_path):
     df['formatted_address'] = df['formatted_address'].astype(str)
 
     for index, row in df.iterrows():
-        if str(row['check']).strip().upper() in ["OK", "NOK"]:
+        if str(row['check']).strip().upper() in ["OK"]:
             print(f"Saltando fila {index + 2}, check ya tiene valor: {row['check']}")
             continue
         
@@ -56,19 +55,32 @@ def normalizar_direciones ():
     normalizador = NormalizadorDirecciones(OPENAI_API_KEY, GMAPS_API_KEY)
 
     # Rutas de los archivos
-    ruta_entrada = "files/Listado_Beneficiario_Para_Georeferencia_desarrollo_noktest_chat_gpt.xlsx"
-    ruta_salida = "files/Listado_Beneficiario_Procesado.xlsx"
+    ruta_entrada = "files/Listados_ok_nok/Listado_beneficiarios_nok.xlsx"
+    ruta_salida = "files/Listados_ok_nok/Listado_beneficiarios_nok.xlsx"
 
     # Ejecutar el procesamiento
     normalizador.procesar_archivo(ruta_entrada, ruta_salida)
+
+def normalizar_direciones_avanzada():
+        # Cargar claves desde variables de entorno
+    OPENAI_API_KEY = os.getenv("openai_api_key_bst")
+    GMAPS_API_KEY = os.getenv("google_maps_api_key")
+
+    # Crear instancia del normalizador
+    normalizador = NormalizadorDirecciones(OPENAI_API_KEY, GMAPS_API_KEY)
+
+    # Rutas de los archivos
+    ruta_entrada = "files/Listados_ok_nok/Listado_beneficiarios_nok.xlsx"
+    ruta_salida = "files/Listados_ok_nok/Listado_beneficiarios_nok.xlsx"
+
+    # Ejecutar el procesamiento
+    normalizador.procesar_archivo_avanzada(ruta_entrada, ruta_salida)
+
 if __name__ == '__main__':
-    ruta_excel = 'files/Listado_Beneficiario_Procesado.xlsx'
-    output_path = 'files/Listado_Beneficiario_Procesado.xlsx'
-    get_lat_long(ruta_excel,output_path)
-    #limpiar_direcciones_excel(
-    #    ruta_excel='files/test_new.xlsx',
-    #    columna_direccion='direccion_beneficiario'
-    #)
-    #normalizar_direciones()
+    #ruta_excel = 'files/Listados_ok_nok/Listado_beneficiarios_nok.xlsx'
+    #output_path = 'files/Listados_ok_nok/Listado_beneficiarios_nok.xlsx'
+    #get_lat_long(ruta_excel,output_path)
+    normalizar_direciones_avanzada()
+
 
 
